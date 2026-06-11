@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>北京时间</title>
+  <meta name="description" content="实时显示中国北京时间 UTC+8" />
+  <style>
+    :root {
+      --bg1: #07111f;
+      --bg2: #12294a;
+      --card: rgba(255, 255, 255, 0.10);
+      --card-border: rgba(255, 255, 255, 0.18);
+      --text: #f7fbff;
+      --muted: rgba(247, 251, 255, 0.72);
+      --accent: #ffd36a;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 15% 20%, rgba(255, 211, 106, 0.18), transparent 28%),
+        radial-gradient(circle at 82% 12%, rgba(99, 179, 237, 0.18), transparent 24%),
+        linear-gradient(135deg, var(--bg1), var(--bg2));
+      display: grid;
+      place-items: center;
+      padding: 22px;
+    }
+
+    .wrap {
+      width: min(720px, 100%);
+      text-align: center;
+    }
+
+    .card {
+      padding: clamp(28px, 6vw, 56px);
+      border: 1px solid var(--card-border);
+      border-radius: 30px;
+      background: var(--card);
+      box-shadow: 0 28px 90px rgba(0, 0, 0, 0.32);
+      backdrop-filter: blur(18px);
+    }
+
+    .label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.12);
+      color: var(--muted);
+      font-size: 15px;
+      letter-spacing: 0.05em;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #4ade80;
+      box-shadow: 0 0 16px #4ade80;
+    }
+
+    h1 {
+      margin: 24px 0 10px;
+      font-size: clamp(28px, 7vw, 56px);
+      font-weight: 800;
+      letter-spacing: 0.04em;
+    }
+
+    .time {
+      margin: 8px 0 14px;
+      font-variant-numeric: tabular-nums;
+      font-size: clamp(52px, 15vw, 116px);
+      font-weight: 850;
+      line-height: 1;
+      letter-spacing: 0.03em;
+      color: var(--accent);
+      text-shadow: 0 10px 34px rgba(255, 211, 106, 0.20);
+    }
+
+    .date {
+      font-size: clamp(18px, 4vw, 26px);
+      color: var(--muted);
+      margin-bottom: 18px;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.8;
+    }
+
+    .qr-box {
+      margin: 28px auto 0;
+      width: fit-content;
+      padding: 14px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.92);
+    }
+
+    .qr-box img {
+      display: block;
+      width: 156px;
+      height: 156px;
+    }
+
+    .qr-caption {
+      margin-top: 10px;
+      color: rgba(7, 17, 31, 0.70);
+      font-size: 13px;
+    }
+
+    .hide { display: none; }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="card" aria-label="北京时间实时显示">
+      <div class="label"><span class="dot"></span> 实时北京时间 · UTC+8</div>
+      <h1>中国时间</h1>
+      <div id="time" class="time">--:--:--</div>
+      <div id="date" class="date">正在获取日期</div>
+      <div class="meta">
+        以 Asia/Shanghai 时区显示。<br />
+        页面会每秒自动刷新，无需手动刷新。
+      </div>
+
+      <div id="qrBlock" class="qr-box hide">
+        <img id="qr" alt="当前网页二维码" />
+        <div class="qr-caption">扫码打开这个时间页面</div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const timeEl = document.getElementById('time');
+    const dateEl = document.getElementById('date');
+    const qrBlock = document.getElementById('qrBlock');
+    const qrImg = document.getElementById('qr');
+
+    const timeFormatter = new Intl.DateTimeFormat('zh-CN', {
+      timeZone: 'Asia/Shanghai',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    });
+
+    const dateFormatter = new Intl.DateTimeFormat('zh-CN', {
+      timeZone: 'Asia/Shanghai',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      weekday: 'long'
+    });
+
+    function updateClock() {
+      const now = new Date();
+      timeEl.textContent = timeFormatter.format(now);
+      dateEl.textContent = dateFormatter.format(now);
+    }
+
+    function setupQrCode() {
+      const url = window.location.href;
+      if (!url.startsWith('http')) return;
+      qrImg.src = 'https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=' + encodeURIComponent(url);
+      qrBlock.classList.remove('hide');
+    }
+
+    updateClock();
+    setupQrCode();
+    setInterval(updateClock, 1000);
+  </script>
+</body>
+</html>
